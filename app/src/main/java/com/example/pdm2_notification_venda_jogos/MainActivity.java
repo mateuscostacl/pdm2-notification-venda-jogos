@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,11 +43,13 @@ public class MainActivity extends AppCompatActivity {
         criarCanal();
     }
 
-    public void notificar() {
+    public void notificar(String texto) {
 
         Intent intent = new Intent(this, SegundaActivity.class);
+        intent.putExtra("media", texto);
+
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.alerta);
 
@@ -83,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button btCadastrar = findViewById(R.id.bt_cadastrar);
         btCadastrar.setOnClickListener(view -> {
+
             Button self = (Button) view;
 
             Jogo jogo = new Jogo();
@@ -92,14 +96,25 @@ public class MainActivity extends AppCompatActivity {
             jogo.setPlataforma(etPlataforma.getText().toString());
 
             jogos.add(jogo);
+
             boolean isMax = jogos.size() >= 3;
             if(isMax) {
                 self.setEnabled(false);
-                notificar();
+                notificar(calcularMedia(jogos));
             }
 
             resetFields();
         });
+    }
+
+    private String calcularMedia(List<Jogo> jogos){
+        Double soma = 0.0;
+
+        for (int i = 0; i < jogos.size(); i++) {
+            soma += jogos.get(i).getPreco();
+        }
+
+        return String.format("%.2f", soma/jogos.size());
     }
 
     private void resetFields() {
